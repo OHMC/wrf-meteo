@@ -10,8 +10,8 @@ Desarrollado para el Observatorio Hidro-Meteorológico de Córdoba
 | path tablas   | Path donde se guardan los csv generados (TBI) |
 
 ## Ejemplo
-´´´Bash
+```Bash
 time python wrfmeteo.py wrfout_A_d01_2020-02-06_18:00:00 ../geotiff/ temp/
-´´´
+```
 
 
