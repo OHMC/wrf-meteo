@@ -4,7 +4,7 @@ Desarrollado para el Observatorio Hidro-Meteorológico de Córdoba
 
 ## Parametros de entrada
 | Variable     | Descripción      |
-|--------------|:----------------:|
+|--------------|------------------|
 | wrfout        | Archivo en formato NetCDF  |
 | path geotiff  | Path donde se guardan los geotiff generados |
 | path tablas   | Path donde se guardan los csv generados (TBI) |
