@@ -7,7 +7,7 @@ import yaml
 
 BASE_LOG_PATH = 'logs'
 LOGGING_CONFIG_FILE = os.getenv('LOG_CFG', 'config/meteo_logging_conf.yml')
-CUENCAS_LOGGER_NAME = 'wrfmeteo'
+METEO_LOGGER_NAME = 'wrfmeteo'
 INGESTOR_LOGGER_NAME = 'ingestor'
 
 

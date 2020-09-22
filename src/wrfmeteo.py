@@ -120,6 +120,9 @@ def generar_imagenes(ncwrf: Dataset, configuracion: str, path_gtiff: str):
 
     for variable in WRF_VARIABLES:
         var = wrf.getvar(ncwrf, variable, timeidx=wrf.ALL_TIMES)
+        if variable == 'T2':
+            var.values = var.values - 273.15
+
         var_proj, geoTransform, target_prj = cambiar_projection(var)
         base_path = f"{path_gtiff}{configuracion}_{variable}"
 
@@ -142,11 +145,12 @@ def generar_producto_meteo(wrfout: str, outdir_productos: str, outdir_csv: str,
     ncwrf = Dataset(wrfout)
 
     start = time.time()
-    path_gtiff = (f'{outdir_productos}/geotiff/'
+    path_gtiff = (f'{outdir_productos}/'
                   f'{rundate.strftime("%Y_%m/%d/")}')
 
     generar_imagenes(ncwrf, configuracion, path_gtiff)
     logger.info(f"Tiempo genear_img_prec = {time.time() - start}")
+    ncwrf.close()
 
 
 def main():
