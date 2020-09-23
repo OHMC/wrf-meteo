@@ -8,15 +8,20 @@ import rasterio
 import time
 import os
 import wrf
+import geopandas as gpd
+import pandas as pd
+from glob import glob
 from config.logging_conf import (METEO_LOGGER_NAME,
                                  get_logger_from_config_file)
 from config.constantes import (CBA_EXTENT, WRF_EXTENT, WRF_VARIABLES,
                                WRFOUT_REGEX, KM_PER_DEGREE, RESOLUTION,
-                               PROG_VERSION)
+                               PROG_VERSION, SHAPE_ZONAS)
 from osgeo import gdal_array, gdal, osr
 from pathlib import Path
 from netCDF4 import Dataset
 from affine import Affine
+from rasterstats import zonal_stats
+
 
 logger = get_logger_from_config_file(METEO_LOGGER_NAME)
 
@@ -90,7 +95,7 @@ def cambiar_projection(in_array: np.ndarray):
                             grid,
                             source_prj.ExportToWkt(),
                             target_prj.ExportToWkt(),
-                            gdal.GRA_Average,
+                            gdal.GRA_NearestNeighbour,
                             options=['NUM_THREADS=ALL_CPUS'])
 
         out_array[t] = grid.ReadAsArray()
@@ -134,6 +139,26 @@ def generar_imagenes(ncwrf: Dataset, configuracion: str, path_gtiff: str):
                         f"{base_path}_{date}")
 
 
+def integrar_en_zonas(out_path: str,
+                      configuracion: str) -> gpd.GeoDataFrame:
+    """
+    This functions opens a geotiff with ppn data, converts to a raster,
+    integrate the ppn into cuencas and returns a GeoDataFrame object.
+
+    Parameters:
+        cuencas_shp: Path to shapefile
+    Returns:
+        cuencas_gdf_ppn (GeoDataFrame): a geodataframe with cuerncas and ppn
+    """
+    zonas_gdf = gpd.read_file(SHAPE_ZONAS)
+
+    base_path = f"{out_path}{configuracion}_T2"
+    lista_tiff = sorted(glob(f'{base_path}*'), key=os.path.getmtime)
+
+    for gtiff in lista_tiff:
+        df_zs = pd.DataFrame(zonal_stats(SHAPE_ZONAS, f"{base_path}.tif"))
+
+
 def generar_producto_meteo(wrfout: str, outdir_productos: str, outdir_csv: str,
                            configuracion=None):
     wrfout_path = Path(wrfout)
@@ -151,6 +176,9 @@ def generar_producto_meteo(wrfout: str, outdir_productos: str, outdir_csv: str,
     generar_imagenes(ncwrf, configuracion, path_gtiff)
     logger.info(f"Tiempo genear_img_prec = {time.time() - start}")
     ncwrf.close()
+
+    start = time.time()
+    zonas_gdf_ppn = integrar_en_zonas(path_gtiff, configuracion)
 
 
 def main():
