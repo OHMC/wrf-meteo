@@ -1,5 +1,3 @@
-
-
 import numpy as np
 import argparse
 import datetime
@@ -8,19 +6,19 @@ import rasterio
 import time
 import os
 import wrf
-import geopandas as gpd
-import pandas as pd
-from glob import glob
+# import geopandas as gpd
+# import pandas as pd
+# from glob import glob
 from config.logging_conf import (METEO_LOGGER_NAME,
                                  get_logger_from_config_file)
 from config.constantes import (CBA_EXTENT, WRF_EXTENT, WRF_VARIABLES,
                                WRFOUT_REGEX, KM_PER_DEGREE, RESOLUTION,
-                               PROG_VERSION, SHAPE_ZONAS)
+                               PROG_VERSION)
 from osgeo import gdal_array, gdal, osr
 from pathlib import Path
 from netCDF4 import Dataset
 from affine import Affine
-from rasterstats import zonal_stats
+# from rasterstats import zonal_stats
 
 
 logger = get_logger_from_config_file(METEO_LOGGER_NAME)
@@ -75,7 +73,7 @@ def cambiar_projection(in_array: np.ndarray):
 
     for t in range(in_array.coords['Time'].size):
         # loar gdal array y se le asigna la projección y transofrmación
-        raw = gdal_array.OpenArray(in_array[t].values)
+        raw = gdal_array.OpenArray(np.flipud(in_array[t].values))
         raw.SetProjection(source_prj.ExportToWkt())
         raw.SetGeoTransform(getGeoT(WRF_EXTENT,
                                     raw.RasterYSize,
@@ -111,7 +109,7 @@ def guardar_tif(geoTransform: list, target_prj: str,
                           count=1, dtype=str(arr.dtype),
                           crs=target_prj,
                           transform=Affine.from_gdal(*geoTransform))
-    nw_ds.write(np.flipud(arr), 1)
+    nw_ds.write(arr, 1)
     nw_ds.close()
 
 
@@ -139,6 +137,7 @@ def generar_imagenes(ncwrf: Dataset, configuracion: str, path_gtiff: str):
                         f"{base_path}_{date}")
 
 
+''''
 def integrar_en_zonas(out_path: str,
                       configuracion: str) -> gpd.GeoDataFrame:
     """
@@ -151,12 +150,18 @@ def integrar_en_zonas(out_path: str,
         cuencas_gdf_ppn (GeoDataFrame): a geodataframe with cuerncas and ppn
     """
     zonas_gdf = gpd.read_file(SHAPE_ZONAS)
+    tmp_gdf = zonas_gdf[['Name', 'geometry']]
 
     base_path = f"{out_path}{configuracion}_T2"
     lista_tiff = sorted(glob(f'{base_path}*'), key=os.path.getmtime)
 
     for gtiff in lista_tiff:
-        df_zs = pd.DataFrame(zonal_stats(SHAPE_ZONAS, f"{base_path}.tif"))
+        df_zs = pd.DataFrame(zonal_stats(SHAPE_ZONAS, gtiff, all_touched=True))
+        df_zs = df_zs.rename(columns={'mean': gtiff[65:]})
+        tmp_gdf = pd.concat([tmp_gdf, df_zs[gtiff[65:]]], axis=1)
+
+    return tmp_gdf
+'''
 
 
 def generar_producto_meteo(wrfout: str, outdir_productos: str, outdir_csv: str,
@@ -178,7 +183,7 @@ def generar_producto_meteo(wrfout: str, outdir_productos: str, outdir_csv: str,
     ncwrf.close()
 
     start = time.time()
-    zonas_gdf_ppn = integrar_en_zonas(path_gtiff, configuracion)
+    # zonas_gdf_ppn = integrar_en_zonas(path_gtiff, configuracion)
 
 
 def main():
