@@ -118,10 +118,11 @@ def guardar_tif(geoTransform: list, target_prj: str,
 def generar_imagenes(ncwrf: Dataset, configuracion: str, path_gtiff: str):
     """
     """
-    try:
-        os.makedirs(os.path.dirname(path_gtiff))
-    except OSError:
-        pass
+    # for future implementation of different path
+    # try:
+    #    os.makedirs(os.path.dirname(path_gtiff))
+    # except OSError:
+    #    pass
 
     for variable in WRF_VARIABLES:
         var = wrf.getvar(ncwrf, variable, timeidx=wrf.ALL_TIMES)
@@ -133,7 +134,7 @@ def generar_imagenes(ncwrf: Dataset, configuracion: str, path_gtiff: str):
 
         for t in range(ncwrf.dimensions['Time'].size):
             date = str(var.coords['Time'].values[t])[:16]
-            logger.info(f"Saving {base_path}_{date} - {time.time()}")
+            logger.info(f"Saving {base_path}_{date}")
             guardar_tif(geoTransform,
                         target_prj,
                         var_proj[t],

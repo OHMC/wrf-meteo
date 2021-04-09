@@ -1,16 +1,16 @@
 import requests
 import argparse
 import pandas as pd
-import time
 from datetime import datetime
 from config.constantes import base_url, Token
 from config.logging_conf import (METEO_LOGGER_NAME,
                                  get_logger_from_config_file)
 
+logger = get_logger_from_config_file(METEO_LOGGER_NAME)
+
 
 def get_config(filename: str):
-    """ Retorna la parametrizacion, la variable y el RUN a partir del nombre del csv
-    """
+    """ Retorna la parametrizacion, la variable y el RUN a partir del nombre del csv """
 
     filename = filename.split('/')[-1]
     wrf, temp = filename.split('_', 1)
@@ -49,13 +49,13 @@ def buildList(wrf_t2p: pd.DataFrame, aws_zones: list, param: str, run: str, var:
 
         response = requests.post(base_url+'datos/', headers=headers, json=json_)
         if response.ok:
-            logger.info(f"POST RESPONSE: {response.json()}- {time.time()}")
+            logger.info(f"POST RESPONSE: {response.json()}")
         else:
-            logger.info(f"POST RESPONSE: {response.content}- {time.time()}")
+            logger.info(f"POST RESPONSE: {response.content}")
 
 
 def getT2P(path: str):
-    logger.info(f"Opening: {path}- {time.time()}"
+    logger.info(f"Opening: {path}")
     wrf_t2p = pd.read_csv(path, header=None, encoding='utf-8')
     wrf_t2p['T2P'] = wrf_t2p[1]
     wrf_t2p['date'] = pd.to_datetime(wrf_t2p[2])
@@ -105,9 +105,6 @@ def main():
     parser.print_help()
 
     ingestor(args.path)
-    # it = ray.util.iter.from_items(filelist, num_shards=4)
-    # proc = [transformGrib.remote(filename) for filename in it.gather_async()]
-    # ray.get(proc)
 
 
 if __name__ == "__main__":

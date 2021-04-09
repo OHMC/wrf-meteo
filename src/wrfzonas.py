@@ -11,6 +11,7 @@ from rasterstats import zonal_stats
 from datetime import datetime
 
 logger = get_logger_from_config_file(METEO_LOGGER_NAME)
+
 ray.init(address='localhost:6380', redis_password='5241590000000000')
 
 
