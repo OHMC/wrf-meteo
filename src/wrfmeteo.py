@@ -36,6 +36,7 @@ def get_configuracion(wrfout) -> (str, datetime.datetime):
     param = m_dict.get('param')
     timestamp = datetime.datetime.strptime(m_dict.get('timestamp'),
                                            '%Y-%m-%d_%H:%M:%S')
+    os.environ["PARAM"] = param
     return param, timestamp
 
 

@@ -126,8 +126,12 @@ venv.bak/
 dmypy.json
 
 # Pyre type checker
+*.gif
+*.csv
 .pyre/
 .vscode/
 **/geotiff/*
 **/logs/*.log
 **/temp/*
+env.sh
+

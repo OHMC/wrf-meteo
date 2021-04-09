@@ -1,3 +1,5 @@
+import os
+
 PROG_VERSION = 'v0.1.0'
 
 WRF_VARIABLES = ['T2', 'TSK', 'wspd10', 'wdir10']
@@ -23,5 +25,8 @@ RECORTE_EXTENT = [-66.07031,
 KM_PER_DEGREE = 111.32
 RESOLUTION = 4
 
-SHAPE_ZONAS = ('/home/sagus/Development/temp/shapefiles/'
-               'Epec/Zona_A_ET_Corbertura_20200922.shp')
+base_url = 'https://bdhm.ohmc.ar/api/'
+
+Toekn = os.getenv('TOKEN')
+user = os.getenv('DB_SUER')
+secret = os.getenv('SECRET')
