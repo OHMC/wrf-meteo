@@ -7,6 +7,9 @@ ray start --head --port=6380 --num-cpus=4
 
 time python wrfmeteo.py ${WRFOUT} ${OUTDIR_PRODUCTOS} ${OUTDIR_TABLA} 
 
-time python wrfzonas.py --path "../geotiff/2020_02/06/CBA_A_18_*" --target zonas --shapefile shapefiles/Zonas_Cobertura.shp
+time python wrfzonas.py --path "../geotiff/2020_02/06/*" --target zonas --shapefile shapefiles/zonas.shp
+
+time python ingestor.py --path csv/WRF_${}_T2P_18.csv
+
 
 ray stop
