@@ -27,6 +27,6 @@ RESOLUTION = 4
 
 base_url = 'https://bdhm.ohmc.ar/api/'
 
-Toekn = os.getenv('TOKEN')
+Token = os.getenv('TOKEN')
 user = os.getenv('DB_SUER')
 secret = os.getenv('SECRET')
