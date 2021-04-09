@@ -1,11 +1,10 @@
 import argparse
 import glob
 import ray
-import os
 import pandas as pd
 import geopandas as gpd
 import numpy as np
-
+import time
 from config.logging_conf import (METEO_LOGGER_NAME,
                                  get_logger_from_config_file)
 from rasterstats import zonal_stats
@@ -53,12 +52,11 @@ def getT2product(dfT2, dfTSK, awsname, param):
     return append
 
 
-def genT2P(target: str):
+def genT2P(target: str, param: str, run: str):
     # Open generated CSV
     # WRF_{param}_{run}_{target}_{var}_all.csv
-    param = os.getenv('PARAM', 'A')
-    data_T0_file = f'csv/WRF_{param}_TSK.csv'
-    data_T2_file = f'csv/WRF_{param}_T2.csv'
+    data_T0_file = f'csv/WRF_{param}_TSK_{run}.csv'
+    data_T2_file = f'csv/WRF_{param}_T2_{run}.csv'
     data_T0 = pd.read_csv(data_T0_file, header=None)
     data_T2 = pd.read_csv(data_T2_file, header=None)
 
@@ -82,7 +80,7 @@ def genT2P(target: str):
         zona_T2 = zona_T2.sort_values(by='date')
 
         data = getT2product(zona_T2, zona_T0, zona, 'T2P')
-        file_out = f'csv/WRF_{param}_T2P.csv'
+        file_out = f'csv/WRF_{param}_T2P_{run}.csv'
         data.to_csv(file_out, mode='a', header=None, encoding='utf-8')
 
 
@@ -124,27 +122,33 @@ def zonalTransfor(filename: str, shapefile: str, target: str):
 
     zonas_gdf = integrate_shapes(filename, shapefile, target)
     zonas_gdf = zonas_gdf[['zona', 'mean']]
+    if var == 'TSK':
+        zonas_gdf['mean'] = zonas_gdf['mean'] - 273.15
     zonas_gdf['date'] = date
     zonas = zonas.append(zonas_gdf, ignore_index=True)
-    filename = f"csv/WRF_{param}_{var}.csv"
-    print(f"Saving in {filename}")
+    filename = f"csv/WRF_{param}_{var}_{run}.csv"
+    logger.info(f"Saving {filename} - {time.time()}")
     zonas.to_csv(filename, mode='a', header=False, encoding='utf-8')
 
 
 def getZones(filelist: list, shapefile: str, target: str):
 
     filelist.sort()
+
     it = ray.util.iter.from_items(filelist, num_shards=4)
     if target == "zonas":
         proc = [zonalTransfor.remote(filename, shapefile, target) for filename in it.gather_async()]
         ray.get(proc)
-        genT2P(target)
+
+        param, run, date, var = getInfo(filelist[1])
+        genT2P(target, param, run)
 
 
 def wrfzonas(regex: str, shapefile: str, target: str):
 
     filelist = getList(regex)
     if not filelist:
+        logger.critical("ERROR: No geotiff file matched in path")
         print("ERROR: No geotiff files matched")
         return
     getZones(filelist, shapefile, target)

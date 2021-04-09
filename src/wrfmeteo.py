@@ -36,6 +36,7 @@ def get_configuracion(wrfout) -> (str, datetime.datetime):
     param = m_dict.get('param')
     timestamp = datetime.datetime.strptime(m_dict.get('timestamp'),
                                            '%Y-%m-%d_%H:%M:%S')
+    os.environ['RUN'] = time.strftime('%H')
     os.environ["PARAM"] = param
     return param, timestamp
 
@@ -132,6 +133,7 @@ def generar_imagenes(ncwrf: Dataset, configuracion: str, path_gtiff: str):
 
         for t in range(ncwrf.dimensions['Time'].size):
             date = str(var.coords['Time'].values[t])[:16]
+            logger.info(f"Saving {base_path}_{date} - {time.time()}")
             guardar_tif(geoTransform,
                         target_prj,
                         var_proj[t],
@@ -176,8 +178,8 @@ def generar_producto_meteo(wrfout: str, outdir_productos: str, outdir_csv: str,
     ncwrf = Dataset(wrfout)
 
     start = time.time()
-    path_gtiff = (f'{outdir_productos}/'
-                  f'{rundate.strftime("%Y_%m/%d/")}')
+    path_gtiff = (f'{outdir_productos}/')
+    #              f'{rundate.strftime("%Y_%m/%d/")}')
 
     generar_imagenes(ncwrf, configuracion, path_gtiff)
     logger.info(f"Tiempo genear_img_prec = {time.time() - start}")
