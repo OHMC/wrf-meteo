@@ -8,6 +8,7 @@ from config.logging_conf import (METEO_LOGGER_NAME,
 
 logger = get_logger_from_config_file(METEO_LOGGER_NAME)
 
+
 def get_config(filename: str):
     """ Retorna la parametrizacion, la variable y el RUN a partir del nombre del csv """
 
@@ -54,11 +55,12 @@ def buildList(wrf_var: pd.DataFrame, aws_zones: list, param: str, run: str, var:
 
 
 def getCsvVar(path: str, var: str):
+    # 'name', 'mean', 'date'
     logger.info(f"Opening: {path}")
     wrf_var = pd.read_csv(path, header=None, encoding='utf-8')
-    wrf_var[f'{var}'] = wrf_var[1]
+    wrf_var[f'{var}'] = wrf_var[2]
     wrf_var['date'] = pd.to_datetime(wrf_var[2])
-    wrf_var['zona'] = wrf_var[3]
+    wrf_var['zona'] = wrf_var[1]
     wrf_var = wrf_var[['date', f'{var}', 'zona']]
 
     return wrf_var
