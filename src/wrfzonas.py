@@ -113,7 +113,7 @@ def integrate_shapes(filename: str, shapefile: str,
 @ray.remote
 def zonalTransfor(filename: str, shapefile: str, target: str):
     param, run, date, var = getInfo(filename)
-    if (var != 'T2' and var != 'TSK'):
+    if (var != 'T2' and var != 'TSK' and var != 'wdir10' and var != 'wspd10'):
         print(f"No processing: {var}")
         return
     else:
