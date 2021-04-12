@@ -2,12 +2,11 @@ import requests
 import argparse
 import pandas as pd
 from datetime import datetime
-from config.constantes import base_url, Token
-from config.logging_conf import (METEO_LOGGER_NAME, variables,
+from config.constantes import base_url, Token, variables
+from config.logging_conf import (METEO_LOGGER_NAME,
                                  get_logger_from_config_file)
 
 logger = get_logger_from_config_file(METEO_LOGGER_NAME)
-
 
 def get_config(filename: str):
     """ Retorna la parametrizacion, la variable y el RUN a partir del nombre del csv """
