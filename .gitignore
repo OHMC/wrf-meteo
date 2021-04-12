@@ -134,4 +134,4 @@ dmypy.json
 **/logs/*.log
 **/temp/*
 env.sh
-
+.DS_Store
