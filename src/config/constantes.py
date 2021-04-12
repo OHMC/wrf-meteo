@@ -30,3 +30,9 @@ base_url = 'https://bdhm.ohmc.ar/api/'
 Token = os.getenv('TOKEN')
 user = os.getenv('DB_SUER')
 secret = os.getenv('SECRET')
+
+variables = {
+    'T2P': 'wrf_mean_region_temperature',
+    'wdir10': 'wrf_mean_region_wdir',
+    'wspd10': 'wrf_mean_region_wspd'
+}
