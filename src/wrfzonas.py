@@ -50,7 +50,7 @@ def getT2product(dfT2, dfTSK, awsname, param):
     append = dfT2[mask].append(dfTSK[maskinverted], sort=True)
     append.sort_index(inplace=True)
 
-    append = append[['name', 'mean', 'date']]
+    append = append[['name', f"T2P_{awsname}_{'param'}", 'date']]
     return append
 
 
