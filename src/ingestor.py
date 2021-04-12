@@ -38,7 +38,7 @@ def buildList(wrf_var: pd.DataFrame, aws_zones: list, param: str, run: str, var:
         i = 0
         for line in temp.iterrows():
             dict = {'fecha': datetime.strftime(line[1]['date'], '%Y%m%dT%H%M%SZ'),
-                    variables[var]: {'data': line[1]['T2P'], 'forecast': i, 'info': wrf_info}
+                    variables[var]: {'data': line[1][var], 'forecast': i, 'info': wrf_info}
                     }
             i = i + 1
             registers_list.append(dict)
