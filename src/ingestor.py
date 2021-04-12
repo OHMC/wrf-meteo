@@ -3,7 +3,7 @@ import argparse
 import pandas as pd
 from datetime import datetime
 from config.constantes import base_url, Token
-from config.logging_conf import (METEO_LOGGER_NAME,
+from config.logging_conf import (METEO_LOGGER_NAME, variables,
                                  get_logger_from_config_file)
 
 logger = get_logger_from_config_file(METEO_LOGGER_NAME)
@@ -20,7 +20,7 @@ def get_config(filename: str):
     return param, run, var
 
 
-def buildList(wrf_t2p: pd.DataFrame, aws_zones: list, param: str, run: str, var: str):
+def buildList(wrf_var: pd.DataFrame, aws_zones: list, param: str, run: str, var: str):
 
     headers = {'Authorization': 'Token ' + Token}
 
@@ -29,7 +29,7 @@ def buildList(wrf_t2p: pd.DataFrame, aws_zones: list, param: str, run: str, var:
                 'grid_resolution': '[4000.0]x[4000.0]', 'global_model': 'GFS'}
 
     for aws in aws_zones:
-        temp = wrf_t2p.loc[wrf_t2p['zona'] == aws['nombre']]
+        temp = wrf_var.loc[wrf_var['zona'] == aws['nombre']]
         temp = temp.sort_values('date')
         uid = aws['id']
 
@@ -38,7 +38,7 @@ def buildList(wrf_t2p: pd.DataFrame, aws_zones: list, param: str, run: str, var:
         i = 0
         for line in temp.iterrows():
             dict = {'fecha': datetime.strftime(line[1]['date'], '%Y%m%dT%H%M%SZ'),
-                    'wrf_mean_region_temperature': {'data': line[1]['T2P'], 'forecast': i, 'info': wrf_info}
+                    variables[var]: {'data': line[1]['T2P'], 'forecast': i, 'info': wrf_info}
                     }
             i = i + 1
             registers_list.append(dict)
@@ -54,15 +54,15 @@ def buildList(wrf_t2p: pd.DataFrame, aws_zones: list, param: str, run: str, var:
             logger.info(f"POST RESPONSE: {response.content}")
 
 
-def getT2P(path: str):
+def getCsvVar(path: str, var: str):
     logger.info(f"Opening: {path}")
-    wrf_t2p = pd.read_csv(path, header=None, encoding='utf-8')
-    wrf_t2p['T2P'] = wrf_t2p[1]
-    wrf_t2p['date'] = pd.to_datetime(wrf_t2p[2])
-    wrf_t2p['zona'] = wrf_t2p[3]
-    wrf_t2p = wrf_t2p[['date', 'T2P', 'zona']]
+    wrf_var = pd.read_csv(path, header=None, encoding='utf-8')
+    wrf_var[f'{var}'] = wrf_var[1]
+    wrf_var['date'] = pd.to_datetime(wrf_var[2])
+    wrf_var['zona'] = wrf_var[3]
+    wrf_var = wrf_var[['date', f'{var}', 'zona']]
 
-    return wrf_t2p
+    return wrf_var
 
 
 def getAWS_Zonal():
@@ -72,8 +72,6 @@ def getAWS_Zonal():
     response = requests.get(url, headers=headers).json()
     aws_list = response['aws_list']
 
-    # filter zonal
-    # find zonal points
     aws_zones = []
     for estacion in aws_list:
         if estacion['metadata']['red'] == 'EPEC':
@@ -87,7 +85,7 @@ def getAWS_Zonal():
 def ingestor(path: str):
     param, run, var = get_config(path)
     aws_zones = getAWS_Zonal()
-    wrf_var = getT2P(path)
+    wrf_var = getCsvVar(path, var)
     buildList(wrf_var, aws_zones, param, run, var)
 
 
