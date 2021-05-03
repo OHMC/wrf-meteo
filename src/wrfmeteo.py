@@ -111,7 +111,7 @@ def guardar_tif(geoTransform: list, target_prj: str,
                           count=1, dtype=str(arr.dtype),
                           crs=target_prj,
                           transform=Affine.from_gdal(*geoTransform))
-    nw_ds.write(arr, 1)
+    nw_ds.write(np.flipud(arr), 1)
     nw_ds.close()
 
 
