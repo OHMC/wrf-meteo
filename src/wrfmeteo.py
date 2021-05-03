@@ -126,7 +126,7 @@ def generar_imagenes(ncwrf: Dataset, configuracion: str, path_gtiff: str):
 
     for variable in WRF_VARIABLES:
         var = wrf.getvar(ncwrf, variable, timeidx=wrf.ALL_TIMES)
-        if variable == 'T2':
+        if variable == 'T2' or variable == 'TSK':
             var.values = var.values - 273.15
 
         var_proj, geoTransform, target_prj = cambiar_projection(var)
