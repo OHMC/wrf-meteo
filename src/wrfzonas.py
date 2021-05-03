@@ -124,8 +124,6 @@ def zonalTransfor(filename: str, shapefile: str, target: str):
 
     zonas_gdf = integrate_shapes(filename, shapefile, target)
     zonas_gdf = zonas_gdf[['zona', 'mean']]
-    if var == 'TSK':
-        zonas_gdf['mean'] = zonas_gdf['mean'] - 273.15
     zonas_gdf['date'] = date
     zonas = zonas.append(zonas_gdf, ignore_index=True)
     filename = f"csv/WRF_{param}_{var}_{run}.csv"
