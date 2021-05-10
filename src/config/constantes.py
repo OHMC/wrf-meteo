@@ -25,7 +25,7 @@ RECORTE_EXTENT = [-66.07031,
 KM_PER_DEGREE = 111.32
 RESOLUTION = 4
 
-base_url = 'https://bdhm.ohmc.ar/api/'
+base_url = 'https://bdhm.ohmc.com.ar/api/'
 
 Token = os.getenv('TOKEN')
 user = os.getenv('DB_SUER')
