@@ -58,7 +58,7 @@ def getCsvVar(path: str, var: str):
     # 'name', 'mean', 'date'
     logger.info(f"Opening: {path}")
     wrf_var = pd.read_csv(path, header=None, encoding='utf-8')
-    wrf_var[f'{var}'] = wrf_var[2]
+    wrf_var[f'{var}'] = wrf_var[3]
     wrf_var['date'] = pd.to_datetime(wrf_var[2])
     wrf_var['zona'] = wrf_var[1]
     wrf_var = wrf_var[['date', f'{var}', 'zona']]
