@@ -59,8 +59,8 @@ def genT2P(target: str, param: str, run: str):
     # WRF_{param}_{run}_{target}_{var}_all.csv
     data_T0_file = f'csv/WRF_{param}_TSK_{run}.csv'
     data_T2_file = f'csv/WRF_{param}_T2_{run}.csv'
-    data_T0 = pd.read_csv(data_T0_file, header=None)
-    data_T2 = pd.read_csv(data_T2_file, header=None)
+    data_T0 = pd.read_csv(data_T0_file, header=None, encoding='utf-8')
+    data_T2 = pd.read_csv(data_T2_file, header=None, encoding='utf-8')
 
     data_T0["name"] = data_T0[1]
     data_T0["mean"] = data_T0[2]

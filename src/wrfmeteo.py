@@ -24,7 +24,7 @@ from affine import Affine
 logger = get_logger_from_config_file(METEO_LOGGER_NAME)
 
 
-def get_configuracion(wrfout) -> (str, datetime.datetime):
+def get_configuracion(wrfout):
     """Retorna la parametrizacion y el timestamp a partir del
     nombre del archivo wrfout"""
     m = re.match(WRFOUT_REGEX, wrfout)
