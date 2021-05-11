@@ -25,7 +25,7 @@ def buildList(wrf_var: pd.DataFrame, aws_zones: list, param: str, run: str, var:
 
     headers = {'Authorization': 'Token ' + Token}
 
-    wrf_info = {'name': 'WRF', 'param': f'{param}', 'run': f'{run}',
+    wrf_info = {'name': 'WRF', 'param': f'{param}', 'run': f'{run}:00',
                 'version': '4.2',
                 'grid_resolution': '[4000.0]x[4000.0]', 'global_model': 'GFS'}
 
