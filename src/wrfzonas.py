@@ -12,7 +12,7 @@ from datetime import datetime
 
 logger = get_logger_from_config_file(METEO_LOGGER_NAME)
 
-ray.init(address='localhost:6380', redis_password='5241590000000000')
+ray.init(address='localhost:6380', _redis_password='5241590000000000')
 
 
 def getInfo(filename: str):
