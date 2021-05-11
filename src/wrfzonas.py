@@ -12,7 +12,7 @@ from datetime import datetime
 
 logger = get_logger_from_config_file(METEO_LOGGER_NAME)
 
-ray.init(address='localhost:6380', _redis_password='5241590000000000')
+ray.init(address='localhost:6380', redis_password='5241590000000000')
 
 
 def getInfo(filename: str):
@@ -87,7 +87,7 @@ def genT2P(target: str, param: str, run: str):
 
 
 def integrate_shapes(filename: str, shapefile: str,
-                     target: str) -> gpd.GeoDataFrame:
+                     target: str, cuencas_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     This functions opens a geotiff with desired data, converts to a raster,
     integrate the data into polygons and returns a GeoDataFrame object.
@@ -98,7 +98,6 @@ def integrate_shapes(filename: str, shapefile: str,
         cuencas_gdf_ppn (GeoDataFrame): a geodataframe with cuerncas and ppn
     """
 
-    cuencas_gdf: gpd.GeoDataFrame = gpd.read_file(shapefile, encoding='utf-8')
     df_zs = pd.DataFrame(zonal_stats(shapefile, filename, all_touched=True))
 
     cuencas_gdf_ppn = pd.concat([cuencas_gdf,
@@ -112,7 +111,7 @@ def integrate_shapes(filename: str, shapefile: str,
 
 
 @ray.remote
-def zonalTransfor(filename: str, shapefile: str, target: str):
+def zonalTransfor(filename: str, shapefile: str, target: str, cuencas_gdf: gpd.GeoDataFrame):
     param, run, date, var = getInfo(filename)
     if (var != 'T2' and var != 'TSK' and var != 'wdir10' and var != 'wspd10'):
         print(f"No processing: {var}")
@@ -122,22 +121,23 @@ def zonalTransfor(filename: str, shapefile: str, target: str):
 
     zonas = pd.DataFrame()
 
-    zonas_gdf = integrate_shapes(filename, shapefile, target)
+    zonas_gdf = integrate_shapes(filename, shapefile, target, cuencas_gdf)
     zonas_gdf = zonas_gdf[['zona', 'mean']]
     zonas_gdf['date'] = date
     zonas = zonas.append(zonas_gdf, ignore_index=True)
     filename = f"csv/WRF_{param}_{var}_{run}.csv"
     logger.info(f"Saving {filename} - {time.time()}")
+    print(f'Saving {filename}')
     zonas.to_csv(filename, mode='a', header=False, encoding='utf-8')
 
 
 def getZones(filelist: list, shapefile: str, target: str):
 
     filelist.sort()
-
+    cuencas_gdf: gpd.GeoDataFrame = gpd.read_file(shapefile)
     it = ray.util.iter.from_items(filelist, num_shards=4)
     if target == "zonas":
-        proc = [zonalTransfor.remote(filename, shapefile, target) for filename in it.gather_async()]
+        proc = [zonalTransfor.remote(filename, shapefile, target, cuencas_gdf) for filename in it.gather_async()]
         ray.get(proc)
 
         param, run, date, var = getInfo(filelist[1])
