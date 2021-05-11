@@ -16,6 +16,7 @@ def get_config(filename: str):
     wrf, temp = filename.split('_', 1)
     param, temp = temp.split('_', 1)
     var, run = temp.split('_', 1)
+    run, extension = run.split('.', 1)
 
     return param, run, var
 
@@ -46,7 +47,6 @@ def buildList(wrf_var: pd.DataFrame, aws_zones: list, param: str, run: str, var:
         # post vía apirest
         json_ = {'id': uid, 'lista_registros': registers_list,
                  'usa_claves': True, 'replace_existing': True}
-
         response = requests.post(base_url+'datos/', headers=headers, json=json_)
         if response.ok:
             logger.info(f"POST RESPONSE: {response.json()}")
@@ -58,8 +58,8 @@ def getCsvVar(path: str, var: str):
     # 'name', 'mean', 'date'
     logger.info(f"Opening: {path}")
     wrf_var = pd.read_csv(path, header=None, encoding='utf-8')
-    wrf_var[f'{var}'] = wrf_var[3]
-    wrf_var['date'] = pd.to_datetime(wrf_var[2])
+    wrf_var[f'{var}'] = wrf_var[2]
+    wrf_var['date'] = pd.to_datetime(wrf_var[3])
     wrf_var['zona'] = wrf_var[1]
     wrf_var = wrf_var[['date', f'{var}', 'zona']]
 
